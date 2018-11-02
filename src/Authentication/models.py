@@ -9,6 +9,9 @@ class Customer(db.Model):
 
     first_name = db.Column(db.String(128), unique = False, nullable = True)
     last_name = db.Column(db.String(128), unique = False, nullable = True)
+    customer_birthday = db.Column(db.Date, unique = False, nullable = True)
+    customer_phone = db.Column(db.Int, unique = False, nullable = True)
+    address_id = db.Column(db.Int, unique = True, nullable = True)
 
     @staticmethod
     def generate_hash(password):
