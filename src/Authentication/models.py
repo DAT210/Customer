@@ -86,3 +86,7 @@ class Address(db.Model):
     street_name = db.Column(db.String(128), unique = False, nullable = True)
     street_number = db.Column(db.String(128), unique = False, nullable = True)
     apartment_number = db.Column(db.String(128), unique = False, nullable = True)
+    
+    @classmethod
+    def find_by_address_id(cls, aid):
+        return cls.query.filter_by(address_id = aid).first()
