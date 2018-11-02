@@ -10,8 +10,8 @@ class Customer(db.Model):
     first_name = db.Column(db.String(128), unique = False, nullable = True)
     last_name = db.Column(db.String(128), unique = False, nullable = True)
     customer_birthday = db.Column(db.Date, unique = False, nullable = True)
-    customer_phone = db.Column(db.Int, unique = False, nullable = True)
-    address_id = db.Column(db.Int, unique = True, nullable = True)
+    customer_phone = db.Column(db.Integer, unique = False, nullable = True)
+    address_id = db.Column(db.Integer, unique = True, nullable = True)
 
     @staticmethod
     def generate_hash(password):
@@ -76,3 +76,13 @@ class RevokedTokenModel(db.Model):
     def is_jti_blacklisted(cls, jti):
         query = cls.query.filter_by(jti = jti).first()
         return bool(query)
+
+
+class Address(db.Model):
+    __tablename__ = "customer_address"
+    address_id = db.Column(db.Integer, primary_key = True, nullable = False)
+    city = db.Column(db.String(128), unique = False, nullable = True)
+    postcode = db.Column(db.SmallInteger, unique = False, nullable = True)
+    street_name = db.Column(db.String(128), unique = False, nullable = True)
+    street_number = db.Column(db.String(128), unique = False, nullable = True)
+    apartment_number = db.Column(db.String(128), unique = False, nullable = True)
