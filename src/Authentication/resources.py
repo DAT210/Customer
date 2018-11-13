@@ -5,24 +5,24 @@ import json
 
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 
-parser = reqparse.RequestParser()
-parser.add_argument('email', help = 'This field can be blank', required = False)
-parser.add_argument('password', help = 'This field can be blank', required = False)
-parser.add_argument('first_name', help = 'This field can be blank', required = False)
-parser.add_argument('last_name', help = 'This field can be blank', required = False)
-parser.add_argument('birthday', help = 'This field can be blank', required = False)
-parser.add_argument('phone', help = 'This field can be blank', required = False)
-parser.add_argument('city', help = 'This field can be blank', required = False)
-parser.add_argument('postcode', help = 'This field can be blank', required = False)
-parser.add_argument('street_name', help = 'This field can be blank', required = False)
-parser.add_argument('street_number', help = 'This field can be blank', required = False)
-parser.add_argument('apartment_number', help = 'This field can be blank', required = False)
+registration_parser = reqparse.RequestParser()
+registration_parser.add_argument('email', help = 'This field cannot be blank', required = True)
+registration_parser.add_argument('password', help = 'This field cannot be blank', required = True)
+registration_parser.add_argument('first_name', help = 'This field can be blank', required = False)
+registration_parser.add_argument('last_name', help = 'This field can be blank', required = False)
+registration_parser.add_argument('birthday', help = 'This field can be blank', required = False)
+registration_parser.add_argument('phone', help = 'This field can be blank', required = False)
+registration_parser.add_argument('city', help = 'This field can be blank', required = False)
+registration_parser.add_argument('postcode', help = 'This field can be blank', required = False)
+registration_parser.add_argument('street_name', help = 'This field can be blank', required = False)
+registration_parser.add_argument('street_number', help = 'This field can be blank', required = False)
+registration_parser.add_argument('apartment_number', help = 'This field can be blank', required = False)
 
 # Registration
 ## URI: /registration
 class CustomerRegistration(Resource):
     def post(self):
-        data = parser.parse_args()
+        data = registration_parser.parse_args()
 
         if not data["email"]:
             return {'message': 'Email is required'}
@@ -99,7 +99,7 @@ class CustomerRegistration(Resource):
 ## URI: /login
 class CustomerLogin(Resource):
     def post(self):
-        data = parser.parse_args()
+        data = registration_parser.parse_args()
 
         # Finding customer from the database
         current_customer = Customer.find_by_email(data['email'])
@@ -218,6 +218,50 @@ class GetEmail(Resource):
                 "error": str(err)
                 }, 500
 
+## URI: /v1/customer/birthday
+class GetBirthday(Resource):
+    @jwt_required
+    def get(self):
+        try:
+            # Getting the cid from the jwt.
+            current_customer = get_jwt_identity()
+
+            # Getting the customer from the database through the model in models.py
+            customer_object = Customer.find_by_cid(current_customer)
+
+            # Checks if no object got returned in the query, then return 401 Unauthorized.
+            if customer_object.customer_id == None:
+                return {"message": "Invalid cid. The customer doesn't exist in our database"}, 401
+            
+            return {"message": "Birthday of the customer was found", "birthday": customer_object.customer_birthday}, 202
+
+        except Exception as err:
+            return {"message": "Something went wrong on the server", 
+                "error": str(err)
+                }, 500
+
+## URI: /v1/customer/phone
+class GetPhone(Resource):
+    @jwt_required
+    def get(self):
+        try:
+            # Getting the cid from the jwt.
+            current_customer = get_jwt_identity()
+
+            # Getting the customer from the database through the model in models.py
+            customer_object = Customer.find_by_cid(current_customer)
+
+            # Checks if no object got returned in the query, then return 401 Unauthorized.
+            if customer_object.customer_id == None:
+                return {"message": "Invalid cid. The customer doesn't exist in our database"}, 401
+            
+            return {"message": "Phone of the customer was found", "phone": customer_object.customer_phone}, 202
+
+        except Exception as err:
+            return {"message": "Something went wrong on the server", 
+                "error": str(err)
+                }, 500
+
 ## URI: /v1/customer/name
 class GetName(Resource):
     @jwt_required
@@ -234,8 +278,8 @@ class GetName(Resource):
                 return {"message": "Invalid cid. The customer doesnt exist in our database"}, 401
 
             return {"message": "Name of the customer was found", 
-                "firstName": customer_object.first_name, 
-                "lastName": customer_object.last_name
+                "first_name": customer_object.first_name, 
+                "last_name": customer_object.last_name
                 }, 202
 
         except Exception as err:
@@ -299,8 +343,10 @@ class GetAll(Resource):
                 return {"message": "Customer was found", 
                     "cid": current_customer,
                     "email": customer_object.customer_email,
-                    "firstName": customer_object.first_name, 
-                    "lastName": customer_object.last_name,
+                    "first_name": customer_object.first_name, 
+                    "last_name": customer_object.last_name,
+                    "birthday": customer_object.customer_birthday,
+                    "phone": customer_object.customer_phone,
                     "city": customer_address.city,
                     "postcode": customer_address.postcode,
                     "street_name": customer_address.street_name,
@@ -311,8 +357,10 @@ class GetAll(Resource):
             return {"message": "Customer was found", 
                 "cid": current_customer,
                 "email": customer_object.customer_email,
-                "firstName": customer_object.first_name, 
-                "lastName": customer_object.last_name,
+                "first_name": customer_object.first_name, 
+                "last_name": customer_object.last_name,
+                "birthday": customer_object.customer_birthday,
+                "phone": customer_object.customer_phone,
                 "city": None,
                 "postcode": None,
                 "street_name": None,

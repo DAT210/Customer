@@ -82,6 +82,8 @@ api.add_resource(resources.GetEmail, '/v1/customer/email')
 api.add_resource(resources.GetName, '/v1/customer/name')
 api.add_resource(resources.GetAddress, '/v1/customer/address')
 api.add_resource(resources.GetAll, '/v1/customer/all')
+api.add_resource(resources.GetBirthday, '/v1/customer/birthday')
+api.add_resource(resources.GetPhone, '/v1/customer/phone')
 
 if __name__ == '__main__':
     app.run(port=25201, host="0.0.0.0", debug=True)

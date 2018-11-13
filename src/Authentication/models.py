@@ -43,11 +43,41 @@ class Customer(db.Model):
     @classmethod
     def return_all(cls):
         def to_json(x):
+            customer_address = None
+            if x.address_id:
+                customer_address = Address.find_by_address_id(x.address_id)
+            
+            if customer_address:
+                return {
+                'email': x.customer_email,
+                'first_name': x.first_name,
+                'last_name': x.last_name,
+                'password': x.customer_password,
+                'first_name': x.first_name,
+                'last_name': x.last_name,
+                'birthday': x.customer_birthday,
+                'phone': x.customer_phone,
+                'city': customer_address.city,
+                'postcode': customer_address.postcode,
+                'street_name': customer_address.street_name,
+                'street_number': customer_address.street_number,
+                'apartment_number': customer_address.apartment_number
+                }
+
             return {
                 'email': x.customer_email,
-                'firstName': x.first_name,
-                'lastName': x.last_name,
-                'password': x.customer_password
+                'first_name': x.first_name,
+                'last_name': x.last_name,
+                'password': x.customer_password,
+                'first_name': x.first_name,
+                'last_name': x.last_name,
+                'birthday': x.customer_birthday,
+                'phone': x.customer_phone,
+                'city': None,
+                'postcode': None,
+                'street_name': None,
+                'street_number': None,
+                'apartment_number': None
                 }
 
         return {'customers': list(map(lambda x: to_json(x), Customer.query.all()))}
