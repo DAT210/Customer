@@ -1,25 +1,41 @@
 from flask_restful import Resource, reqparse
-from models import Customer, RevokedTokenModel
+from models import Customer, RevokedTokenModel, Address
 import random
 import json
 
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 
 parser = reqparse.RequestParser()
-parser.add_argument('email', help = 'This field cannot be blank', required = True)
-parser.add_argument('password', help = 'This field cannot be blank', required = True)
+parser.add_argument('email', help = 'This field can be blank', required = False)
+parser.add_argument('password', help = 'This field can be blank', required = False)
+parser.add_argument('first_name', help = 'This field can be blank', required = False)
+parser.add_argument('last_name', help = 'This field can be blank', required = False)
+parser.add_argument('birthday', help = 'This field can be blank', required = False)
+parser.add_argument('phone', help = 'This field can be blank', required = False)
+parser.add_argument('city', help = 'This field can be blank', required = False)
+parser.add_argument('postcode', help = 'This field can be blank', required = False)
+parser.add_argument('street_name', help = 'This field can be blank', required = False)
+parser.add_argument('street_number', help = 'This field can be blank', required = False)
+parser.add_argument('apartment_number', help = 'This field can be blank', required = False)
 
 # Registration
 ## URI: /registration
 class CustomerRegistration(Resource):
     def post(self):
         data = parser.parse_args()
-        # Hashing password as soon as possible, Please dont add anything between the line above and below this comment
-        data["password"] = Customer.generate_hash(data["password"])
+
+        if not data["email"]:
+            return {'message': 'Email is required'}
+
+        if not data["password"]:
+            return {'message': 'Password is required'}
 
         # Checking if the email is already in our database, returns message if it is. Countinues if not.
         if Customer.find_by_email(data['email']):
-          return {'message': 'User {} already exists'. format(data['email'])}
+            return {'message': 'User {} already exists'. format(data['email'])}
+
+        # Hashing password as soon as possible, Please dont add anything between the line above and below this comment
+        data["password"] = Customer.generate_hash(data["password"])
 
         #TODO: Improve this \/
         cid = random.randint(10000000, 99999999)
@@ -28,16 +44,42 @@ class CustomerRegistration(Resource):
                 cid = 10000000
             else:
                 cid += 1
+
+        aid = None
+        if data["city"] or data["postcode"] or data["street_name"] or data["street_number"] or data["apartment_number"]:
+            aid = random.randint(10000000, 99999999)
+            while Address.find_by_address_id(aid):
+                if aid >= 99999999:
+                    aid = 10000000
+                else:
+                    aid += 1
         
         # Making a new model with the email and password provided
         new_customer = Customer(
             customer_id = cid,
-            customer_email = data['email'],
-            customer_password = data["password"]
+            customer_email = data["email"],
+            customer_password = data["password"],
+            first_name = data["first_name"],
+            last_name = data["last_name"],
+            customer_birthday = data["birthday"],
+            customer_phone = data["phone"],
+            address_id = aid
         )
+
+        if aid:
+            new_address = Address(
+            address_id = aid,
+            city = data["city"],
+            postcode = data["postcode"],
+            street_name = data["street_name"],
+            street_number = data["street_number"],
+            apartment_number = data["apartment_number"]
+        )
+
         try:
             # Saving the new user to the database. the method is located in models.py
             new_customer.save_to_db()
+            new_address.save_to_db()
 
             # Making tokens so the customer is logged in
             access_token = create_access_token(identity = cid)
@@ -163,7 +205,7 @@ class GetEmail(Resource):
             current_customer = get_jwt_identity()
 
             # Getting the customer from the database through the model in models.py
-            customer_object= Customer.find_by_cid(current_customer)
+            customer_object = Customer.find_by_cid(current_customer)
 
             # Checks if no object got returned in the query, then return 401 Unauthorized.
             if customer_object == None:
@@ -185,7 +227,7 @@ class GetName(Resource):
             current_customer = get_jwt_identity()
 
             # Getting the customer from the database through the model in models.py
-            customer_object= Customer.find_by_cid(current_customer)
+            customer_object = Customer.find_by_cid(current_customer)
 
             # Checks if no object got returned in the query, then return 401 Unauthorized.
             if customer_object == None:
@@ -194,6 +236,88 @@ class GetName(Resource):
             return {"message": "Name of the customer was found", 
                 "firstName": customer_object.first_name, 
                 "lastName": customer_object.last_name
+                }, 202
+
+        except Exception as err:
+            return {"message": "Something went wrong on the server", 
+                "error": str(err)
+                }, 500
+
+## URI: /v1/customer/address
+class GetAddress(Resource):
+    @jwt_required
+    def get(self):
+        try:
+            # Getting the cid from the jwt.
+            current_customer = get_jwt_identity()
+
+            # Getting the customer from the database through the model in models.py
+            customer_object = Customer.find_by_cid(current_customer)
+
+            # Checks if no object got returned in the query, then return 401 Unauthorized.
+            if customer_object.customer_id == None:
+                return {"message": "Invalid cid. The customer doesn't exist in our database"}, 401
+
+            if customer_object.address_id == None:
+                return {"message": "The customer has no address"}, 401
+
+            customer_address = Address.find_by_address_id(customer_object.address_id)
+
+            return {"message": "Address of the customer was found", 
+                "city": customer_address.city,
+                "postcode": customer_address.postcode,
+                "street_name": customer_address.street_name,
+                "street_number": customer_address.street_number,
+                "apartment_number": customer_address.apartment_number
+                }, 202
+
+        except Exception as err:
+            return {"message": "Something went wrong on the server", 
+                "error": str(err)
+                }, 500
+                
+## URI: /v1/customer/all
+class GetAll(Resource):
+    @jwt_required
+    def get(self):
+        try:
+            # Getting the cid from the jwt.
+            current_customer = get_jwt_identity()
+
+            # Getting the customer from the database through the model in models.py
+            customer_object = Customer.find_by_cid(current_customer)
+
+            # Checks if no object got returned in the query, then return 401 Unauthorized.
+            if customer_object.customer_id == None:
+                return {"message": "Invalid cid. The customer doesn't exist in our database"}, 401
+
+            if customer_object.address_id:
+                
+
+                customer_address = Address.find_by_address_id(customer_object.address_id)
+
+                return {"message": "Customer was found", 
+                    "cid": current_customer,
+                    "email": customer_object.customer_email,
+                    "firstName": customer_object.first_name, 
+                    "lastName": customer_object.last_name,
+                    "city": customer_address.city,
+                    "postcode": customer_address.postcode,
+                    "street_name": customer_address.street_name,
+                    "street_number": customer_address.street_number,
+                    "apartment_number": customer_address.apartment_number
+                    }, 202
+                
+            return {"message": "Customer was found", 
+                "cid": current_customer,
+                "email": customer_object.customer_email,
+                "firstName": customer_object.first_name, 
+                "lastName": customer_object.last_name,
+                "city": None,
+                "postcode": None,
+                "street_name": None,
+                "street_number": None,
+                "apartment_number": None
                 }, 202
 
         except Exception as err:

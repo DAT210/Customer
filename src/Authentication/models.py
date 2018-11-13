@@ -90,3 +90,7 @@ class Address(db.Model):
     @classmethod
     def find_by_address_id(cls, aid):
         return cls.query.filter_by(address_id = aid).first()
+        
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
