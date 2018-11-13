@@ -79,7 +79,8 @@ class CustomerRegistration(Resource):
         try:
             # Saving the new user to the database. the method is located in models.py
             new_customer.save_to_db()
-            new_address.save_to_db()
+            if aid:
+                new_address.save_to_db()
 
             # Making tokens so the customer is logged in
             access_token = create_access_token(identity = cid)
