@@ -173,6 +173,94 @@ class AllCustomers(Resource):
 
 
 # The following classes are for the Api
+
+edit_parser = reqparse.RequestParser()
+edit_parser.add_argument('password', help = 'This field can be blank', required = False)
+edit_parser.add_argument('first_name', help = 'This field can be blank', required = False)
+edit_parser.add_argument('last_name', help = 'This field can be blank', required = False)
+edit_parser.add_argument('birthday', help = 'This field can be blank', required = False)
+edit_parser.add_argument('phone', help = 'This field can be blank', required = False)
+edit_parser.add_argument('city', help = 'This field can be blank', required = False)
+edit_parser.add_argument('postcode', help = 'This field can be blank', required = False)
+edit_parser.add_argument('street_name', help = 'This field can be blank', required = False)
+edit_parser.add_argument('street_number', help = 'This field can be blank', required = False)
+edit_parser.add_argument('apartment_number', help = 'This field can be blank', required = False)
+
+## URI: /v1/customer/edit
+class Edit(Resource):
+    @jwt_required
+    def post(self):
+        data = edit_parser.parse_args()
+        
+        # Getting the cid from the jwt.
+        current_customer = get_jwt_identity()
+
+        # Getting the customer from the database through the model in models.py
+        customer_object = Customer.find_by_cid(current_customer)
+        
+        # Hashing password as soon as possible, Please dont add anything between the line above and below this comment
+        data["password"] = Customer.generate_hash(data["password"])
+
+        # Checks if no object got returned in the query, then return 401 Unauthorized.
+        if customer_object.customer_id == None:
+            return {"message": "Invalid cid. The customer doesn't exist in our database"}, 401
+
+        if data["password"]:
+            customer_object.customer_password = data["password"]
+        if data["first_name"]:
+            customer_object.first_name = data["first_name"]
+        if data["last_name"]:
+            customer_object.last_name = data["last_name"]
+        if data["birthday"]:
+            customer_object.customer_birthday = data["birthday"]
+        if data["phone"]:
+            customer_object.customer_phone = data["phone"]
+
+        customer_address = None
+        new_address = None
+        if data["city"] or data["postcode"] or data["street_name"] or data["street_number"] or data["apartment_number"]:
+            if customer_object.address_id:
+                customer_address = Address.find_by_address_id(customer_object.address_id)
+                if data ["city"]:
+                    customer_address.city = data["city"]
+                if data ["postcode"]:
+                    customer_address.postcode = data["postcode"]
+                if data ["street_name"]:
+                    customer_address.street_name = data["street_name"]
+                if data ["street_number"]:
+                    customer_address.street_number = data["street_number"]
+                if data ["apartment_number"]:
+                    customer_address.apartment_number = data["apartment_number"]
+            else:
+                aid = random.randint(10000000, 99999999)
+                while Address.find_by_address_id(aid):
+                    if aid >= 99999999:
+                        aid = 10000000
+                    else:
+                        aid += 1
+                new_address = Address(
+                address_id = aid,
+                city = data["city"],
+                postcode = data["postcode"],
+                street_name = data["street_name"],
+                street_number = data["street_number"],
+                apartment_number = data["apartment_number"]
+                )
+                current_customer.address_id = aid
+
+        try:
+            # Saving the new user to the database. the method is located in models.py
+            if new_address:new_address.save_to_db()
+            customer_object.commit()
+
+            return {
+                'message': 'Customer {} was edited'.format(customer_object.customer_email),
+            }, 201
+        except Exception as err:
+            return {'message': 'Something went wrong', 
+                "error": str(err)
+                }, 500
+
 ## URI: /v1/customer/cid
 class GetCid(Resource):
     @jwt_required

@@ -39,6 +39,9 @@ class Customer(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def commit(self):
+        db.session.commit()
+
     # TODO: Remove this method before production!
     @classmethod
     def return_all(cls):
@@ -123,4 +126,7 @@ class Address(db.Model):
         
     def save_to_db(self):
         db.session.add(self)
+        db.session.commit()
+
+    def commit(self):
         db.session.commit()
