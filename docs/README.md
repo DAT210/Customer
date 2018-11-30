@@ -12,6 +12,6 @@ Welcome to the documentation for Customer API.
 
 
 ## Base address to use when interacting with the Customer Api
-* If you are using docker toolbox: http://192.168.99.100:5052/
-* If you are using the new docker: http://127.0.0.1:5052/
+* If you are using docker toolbox: http://192.168.99.100:25201/
+* If you are using the new docker: http://127.0.0.1:25201/
 
