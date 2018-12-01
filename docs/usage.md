@@ -371,7 +371,7 @@ def get_headers():
 @app.route("/cid")
 def get_cid():
     # Sending the get-request with the header required
-    r = requests.get("127.0.0.1:5052/v1/customer/cid", headers=get_headers())
+    r = requests.get("127.0.0.1:25201/v1/customer/cid", headers=get_headers())
     
     # If the status code is 500, an error on our part occured
     if r.status() == 500:
