@@ -7,7 +7,7 @@ services:
     links:
       - db
     ports:
-      - "5052:5052"
+      - "25201:25201"
     environment:
       MySQLPassword: ${MySQLPassword}
       CustomerSecret: ${CustomerSecret}
@@ -15,7 +15,7 @@ services:
   db:
     build: ./src/Database
     ports:
-      - "32010:3306"
+      - "25202:3306"
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_ROOT_PASSWORD: ${MySQLPassword}
