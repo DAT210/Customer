@@ -58,8 +58,8 @@ __Make sure you have installed Git and Docker before doing the commands below.__
 
 ### IP address to send requsts to:
 
-* If you are using docker toolbox, the address is  http://192.168.99.100:5052/
-* If you are using the new docker, the address is  http://127.0.0.1:5052/
+* If you are using docker toolbox, the address is  http://192.168.99.100:25201/
+* If you are using the new docker, the address is  http://127.0.0.1:25201/
 
 > Note: If you change anything in the files of the composer, you need to stop the container and run it again for the changes to take effect. How to do that in _Useful for testing_ below.
 
@@ -101,4 +101,4 @@ In order to obtain information about the Customer, send a get-request with the a
 * /v1/customer/email
 * /v1/customer/name
 
-> For example, if you are using the new docker, send a get request to 127.0.0.1:5052/v1/customer/cid to get the cid of the currently logged in customer.
+> For example, if you are using the new docker, send a get request to 127.0.0.1:25201/v1/customer/cid to get the cid of the currently logged in customer.

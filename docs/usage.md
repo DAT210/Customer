@@ -23,8 +23,8 @@ The links scrolls you to that section.
 
 
 __When referring to address, it is the following:__
-* If you are using docker toolbox, the address is  http://192.168.99.100:5052/
-* If you are using the new docker, the address is  http://127.0.0.1:5052/
+* If you are using docker toolbox, the address is  http://192.168.99.100:25201/
+* If you are using the new docker, the address is  http://127.0.0.1:25201/
 
 > If you have any issues or something is unclear, please check out [FAQ](/faq.md) or contact Group 5 in the group classes or on slack(Bjørnar/Martin).
 
@@ -210,7 +210,7 @@ def get_email():
     jti = get_raw_jwt()["jti"]
     
     # Sending the get-request with the header required
-    r = requests.get("127.0.0.1:5052/v1/customer/email", headers=get_headers()
+    r = requests.get("127.0.0.1:25201/v1/customer/email", headers=get_headers()
     
     # If the status code is 500, an error on our part occured
     if r.status() == 500:
@@ -274,7 +274,7 @@ def get_name():
     jti = get_raw_jti()["jti"]
     
     # Sending the get-request with the header required
-    r = requests.get("127.0.0.1:5052/v1/customer/name", headers=get_headers())
+    r = requests.get("127.0.0.1:25201/v1/customer/name", headers=get_headers())
     
     # If the status code is 500, an error on our part occured
     if r.status() == 500:
@@ -371,7 +371,7 @@ def get_headers():
 @app.route("/cid")
 def get_cid():
     # Sending the get-request with the header required
-    r = requests.get("127.0.0.1:5052/v1/customer/cid", headers=get_headers())
+    r = requests.get("127.0.0.1:25201/v1/customer/cid", headers=get_headers())
     
     # If the status code is 500, an error on our part occured
     if r.status() == 500:
@@ -392,7 +392,7 @@ def get_cid():
 @app.route("/email")
 def get_email():
     # Sending the get-request with the header required
-    r = requests.get("127.0.0.1:5052/v1/customer/email", headers=get_headers())
+    r = requests.get("127.0.0.1:25201/v1/customer/email", headers=get_headers())
     
     # If the status code is 500, an error on our part occured
     if r.status() == 500:
@@ -413,7 +413,7 @@ def get_email():
 @app.route("/name")
 def get_name():
     # Sending the get-request with the header required
-    r = requests.get("127.0.0.1:5052/v1/customer/name", headers=get_headers())
+    r = requests.get("127.0.0.1:25201/v1/customer/name", headers=get_headers())
     
     # If the status code is 500, an error on our part occured
     if r.status() == 500:
